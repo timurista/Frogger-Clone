@@ -195,14 +195,14 @@ var Clock = function() {
 // clock time limit and time it begins are tracked
 Clock.prototype.reset = function() {
     this.startTime= Date.now();
-    this.timeAllowed = 100;
+    this.timeAllowed = 100.0;
     this.time = this.timeAllowed;
     }
 //time is converted to seconds and removed from current time on update
 Clock.prototype.update = function() {
     var secondsElapsed = (Date.now()-this.startTime)/1000;
     // only seconds value so we need toFixed
-    this.time-=secondsElapsed.toFixed(0);
+    this.time=this.timeAllowed-secondsElapsed.toFixed(0);
     this.render();
     }
 Clock.prototype.render = function() {
