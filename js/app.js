@@ -84,7 +84,7 @@ Player.prototype.update = function() {
     //condition where player scores or reaches end of road
     if (this.y<rowStep*1) {
         //player reaches water, give them reward
-        this.score+=5;
+        this.score+=2;
         this.reset();
     }
 }
