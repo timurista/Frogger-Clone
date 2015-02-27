@@ -175,26 +175,22 @@ var Engine = (function(global) {
      * on your enemy and player entities within app.js
      */
     function renderEntities() {
-        //render collectibles
-        collectible.render();
-
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
+        //render collectible first so it will be below enemy
+        collectible.render();
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
-
         player.render();
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
+    /* This function handles creating a new game and reseting values
      */
     function reset() {
+        //TODO replace alerts with new game screen
         alert("new game started");
-
         //reset HUD
         scoreDisplay.reset();
         clock.reset();
@@ -205,8 +201,6 @@ var Engine = (function(global) {
         //reset player and item
         player.reset();
         collectible.reset();
-
-        // noop
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -218,7 +212,7 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
     ]);
     Resources.onReady(init);
 

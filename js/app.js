@@ -1,4 +1,4 @@
-//mathranomVar
+//helper functions
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -7,12 +7,14 @@ function getRandomInt(min, max) {
 var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
+    this.reset();
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.reset();
     this.sprite = 'images/enemy-bug.png';
+    //damage done to player
     this.damage = 5;
+    //for collision detection
     this.width = 10;
     this.height = 10;
 }
@@ -30,15 +32,10 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     this.x+=this.speed*dt;
+    //resets enemy location when they leave the screen
     if (this.x>WIDTH) {
-        //console.log(this.x)
         this.reset();
     }
-    //draw tracking info
-    //ctx.fillStyle = "rgb(150,29,28)";
-    //ctx.fillStyle = "blue";
-    //ctx.strokeRect(this.x,this.y,this.width,this.height);
-    //ctx.strokeRect(50,50,50,50);
 }
 
 // Draw the enemy on the screen, required method for game
@@ -46,7 +43,7 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
-//global vars to move player
+//global vars used to store object information
 var colStep = 101;
 var rowStep = 80;
 var boundHeight = 40;
@@ -70,6 +67,8 @@ Player.prototype.reset = function() {
     this.x = PlayerStartPositionX;
     this.y = PlayerStartPositionY;
 }
+// move vector for storing player potential move velocity
+// used to check collisions with objects
 Player.prototype.move = [0,0];
 
 Player.prototype.update = function() {
@@ -84,7 +83,7 @@ Player.prototype.update = function() {
     }
     //condition where player scores or reaches end of road
     if (this.y<rowStep*1) {
-        //player reaches end
+        //player reaches water, give them reward
         this.score+=5;
         this.reset();
     }
@@ -94,6 +93,9 @@ Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
+// key presses are tracked and stored in move vector
+// only one move per key press to prevent holding down any individual key
+//row and col steps make sure player moves to the next grid spot
 Player.prototype.handleInput = function(key) {
     if (key=="up") {
         this.move[1]=-1*rowStep;
@@ -111,9 +113,6 @@ Player.prototype.handleInput = function(key) {
         this.move[0]=colStep;
         this.move[1]=0;
     }
-
-    console.log(key,this.move);
-
 }
 //new Enemies
 var RockEnemy = function() {
@@ -122,7 +121,9 @@ var RockEnemy = function() {
     //extra damage for this creature to player
     this.damage = 10;
 }
+//implements same methods as Enemy, so we need to call Enemy prototype
 RockEnemy.prototype = Object.create(Enemy.prototype);
+//rewriting some hookups because rock image is too big
 RockEnemy.prototype.render = function() {
     var img = new Image();
     img.src = this.sprite;
@@ -134,10 +135,6 @@ RockEnemy.prototype.reset = function() {
     this.y = getRandomInt(1,4)*rowStep+2;
     this.speed = 300;
 }
-
-//Van.prototype.constructor = Van;
-//Van.prototype.grab = function() {};
-
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -159,11 +156,12 @@ document.addEventListener('keyup', function(e) {
     player.handleInput(allowedKeys[e.keyCode]);
 });
 
-//Collectibles
+//Collectibles, adds points to player score
 var Collectible = function() {
     this.reset();
 }
 Collectible.prototype.reset = function() {
+    //variable to hold all possible types of gems player can collect
     this.CollectibleTypes = [
         ['images/Gem-Green.png',1],
         ['images/Gem-Blue.png',2],
@@ -171,9 +169,9 @@ Collectible.prototype.reset = function() {
     ];
     this.randomCollectibleType = this.CollectibleTypes[getRandomInt(0,this.CollectibleTypes.length)];
     this.sprite = this.randomCollectibleType[0];
-    //to hold player points
+    //to hold points player will score when they land on this
     this.val = this.randomCollectibleType[1];
-    //console.log(this.sprite,this.randomCollectibleType);
+
     //places the collectible in the road somewhere
     this.x = getRandomInt(1,5)*colStep;
     this.y = getRandomInt(1,4)*rowStep;
@@ -181,7 +179,7 @@ Collectible.prototype.reset = function() {
     this.width=10;
 }
 Collectible.prototype.render = function() {
-    //rewrite render function the provided caching is buggy
+    //rewrite render function because the provided caching is buggy with new pngs
     var img = new Image();
     img.src = this.sprite;
     ctx.drawImage(img, this.x+20, this.y+20,
@@ -194,14 +192,17 @@ var collectible = new Collectible();
 var Clock = function() {
     this.reset();
 }
+// clock time limit and time it begins are tracked
 Clock.prototype.reset = function() {
     this.startTime= Date.now();
-    this.timeAllowed = 100.0;
+    this.timeAllowed = 100;
     this.time = this.timeAllowed;
     }
+//time is converted to seconds and removed from current time on update
 Clock.prototype.update = function() {
     var secondsElapsed = (Date.now()-this.startTime)/1000;
-    this.time=(this.timeAllowed-secondsElapsed).toFixed(0);
+    // only seconds value so we need toFixed
+    this.time-=secondsElapsed.toFixed(0);
     this.render();
     }
 Clock.prototype.render = function() {
@@ -223,10 +224,9 @@ Clock.prototype.render = function() {
     ctx.lineWidth = 2;
     ctx.strokeText(timeText,WIDTH/2,40);
 }
-
 var clock = new Clock;
 
-//score
+//Score tracking done in this HUD
 var ScoreDisplay = function() {
     this.reset();
 }
@@ -239,7 +239,9 @@ ScoreDisplay.prototype.update = function() {
     this.render();
 }
 ScoreDisplay.prototype.render = function() {
-    //draw new text for time
+    // draw new text for player's score
+    // TODO: this can be modified later to include a loop
+    // for multiple players
     var scoreText = "Score: "+player.score;
     var fillColor = "white";
     if (player.score>0) {
