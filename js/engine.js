@@ -98,7 +98,7 @@ var Engine = (function(global) {
         if (clock.time<=0) {
             alert("game over");
             reset();
-        }
+        };
         player.update();
         scoreDisplay.update();
     }
@@ -122,7 +122,7 @@ var Engine = (function(global) {
         });
         //collectible
         if (checkCollision(collectible,player)) {
-            player.score+=collectible.val;
+            player.score += collectible.val;
             collectible.reset();
         }
     }
@@ -163,12 +163,12 @@ var Engine = (function(global) {
                  * we're using them over and over.
                  */
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
-            }
-        }
+            };
+        };
 
 
         renderEntities();
-    }
+    };
 
     /* This function is called by the render function and is called on each game
      * tick. It's purpose is to then call the render functions you have defined
@@ -184,7 +184,7 @@ var Engine = (function(global) {
             enemy.render();
         });
         player.render();
-    }
+    };
 
     /* This function handles creating a new game and reseting values
      */
@@ -201,7 +201,7 @@ var Engine = (function(global) {
         //reset player and item
         player.reset();
         collectible.reset();
-    }
+    };
 
     /* Go ahead and load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
